@@ -1,8 +1,10 @@
 # Pixel8r
 
-**Pixel8r** is a decentralized NFT platform built with **Next.js**, **Solidity**, and modern web tech, empowering users to create pixel art NFTs, list them on a marketplace, and manage collections with blockchain transparency.
+Pixel8r is a decentralized NFT platform built with **Next.js**, **Solidity**, and modern web technologies, empowering users to create **pixel art NFTs**, list them on a marketplace, and manage collections with **blockchain transparency**.
 
-What sets **Pixel8r** apart? **It makes digital art copyright-proof.** By subtly altering each pixel’s composition, the platform ensures every artwork is **one-of-a-kind and immune to copyright claims**. Your creations remain **unique, secure, and truly yours** — down to the last pixel.
+What sets **Pixel8r** apart? It makes **digital art copyright-proof**. By subtly altering each pixel’s composition, the platform ensures that **every artwork is one-of-a-kind and immune to copyright claims**. Your creations remain **unique, secure, and truly yours** — down to the last pixel.
+
+Additionally, Pixel8r integrates an **AI-powered NFT expert**, built using **CopilotKit**, to assist users throughout the platform. The AI agent provides **personalized guidance** on creating, listing, and managing NFTs, helping users navigate the **NFT landscape** efficiently. Whether you're a beginner or an experienced creator, the **AI expert** ensures you make the most of your digital art journey on Pixel8r.
 
 ## Live Demo: https://pixel8r.vercel.app
 
