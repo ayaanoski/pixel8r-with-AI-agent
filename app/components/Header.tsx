@@ -85,7 +85,7 @@ export default function Header() {
           ))}
           <div className="h-px w-full bg-purple-500 mx-auto opacity-30" />
           <a
-            href="https://github.com/ayaanoski/pixel8r"
+            href="https://github.com/ayaanoski/pixel8r-with-AI-agent"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 pixel-font py-2 px-4 hover:bg-purple-700 transition-colors duration-300"
