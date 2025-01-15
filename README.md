@@ -6,7 +6,7 @@ What sets **Pixel8r** apart? It makes **digital art copyright-proof**. By subtly
 
 Additionally, Pixel8r integrates an **AI-powered NFT expert**, built using **CopilotKit**, to assist users throughout the platform. The AI agent provides **personalized guidance** on creating, listing, and managing NFTs, helping users navigate the **NFT landscape** efficiently. Whether you're a beginner or an experienced creator, the **AI expert** ensures you make the most of your digital art journey on Pixel8r.
 
-## Live Demo: https://pixel8r-with-ai-agent.vercel.app/nft-ai
+## Live Demo: [https://pixel8r-with-ai-agent.vercel.app/nft-ai](https://pixel8r2.vercel.app)
 
 ![image](https://github.com/user-attachments/assets/0854d020-6474-4f9e-86e7-8408e5c5d4a7)
 
