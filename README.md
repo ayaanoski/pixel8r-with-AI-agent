@@ -76,26 +76,17 @@ cd pixel8r
 
 ### Step 2: Install Dependencies
 ```bash
-npm install
+npm install --legacy--peer-deps
 ```
 
 ### Step 3: Set Up Environment Variables
 Create a `.env` file in the root directory and add the following variables:
 ```env
-NEXT_PUBLIC_INFURA_API_KEY=your_infura_api_key
-NEXT_PUBLIC_WALLET_ADDRESS=your_wallet_address
 IO_INTELLIGENCE_API_KEY=your_api_key
 IO_MODEL_ID=any_model_name
 ```
 
-### Step 4: Compile and Deploy Smart Contracts
-Navigate to the `contracts` directory and deploy the smart contracts using Truffle.
-```bash
-truffle compile
-truffle migrate --network your_network_name
-```
-
-### Step 5: Run the Development Server
+### Step 4: Run the Development Server
 Start the Next.js development server:
 ```bash
 npm run dev
