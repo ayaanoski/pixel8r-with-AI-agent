@@ -18,14 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen flex flex-col`}>
-        <CopilotKit
-          publicApiKey={process.env.NEXT_PUBLIC_COPILOT_API_KEY || ''}
-        >
           <Header />
           <main className="flex-grow">
             {children}
           </main>
-        </CopilotKit>
       </body>
     </html>
   )

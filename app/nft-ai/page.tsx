@@ -1,23 +1,24 @@
 "use client";
 
-import React, { useState } from 'react';
-import { CopilotTextarea } from "@copilotkit/react-textarea";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import BackgroundCollage from '../components/BackgroundCollage';
+import BackgroundCollage from "../components/BackgroundCollage";
+import { Zap } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 type Message = {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
 };
 
 const NFTAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
-      role: 'assistant',
-      content: "Hello! I'm here to help you with anything related to NFTs. Ask away!",
+      role: "assistant",
+      content: "Hello! I'm here to help you with anything related to **NFTs**. Ask away!",
     },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,36 +30,31 @@ const NFTAssistant = () => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    setIsLoading(true);
-    setError(null);
-
     const userMessage: Message = {
-      role: 'user',
+      role: "user",
       content: input.trim(),
     };
 
-    try {
-      const newMessages = [...messages, userMessage];
-      setMessages(newMessages);
-      setInput('');
+    setIsLoading(true);
+    setError(null);
+    setInput("");
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
 
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    try {
+      const response = await fetch("/api/io-agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: newMessages }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get response');
-      }
+      if (!response.ok) throw new Error("Agent response failed");
 
       const data = await response.json();
-      setMessages([...newMessages, data.messages[data.messages.length - 1]]);
+      setMessages([...newMessages, data.reply]);
     } catch (err) {
-      setError("Failed to send message. Please try again.");
-      console.error("Error sending message:", err);
+      console.error(err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -86,9 +82,19 @@ const NFTAssistant = () => {
                   }`}
                 >
                   {message.role === "assistant" ? (
-                    <pre className="pixel-font text-sm whitespace-pre-wrap leading-relaxed">
-                      {message.content}
-                    </pre>
+                    <ReactMarkdown
+  components={{
+    p: ({ node, children }) => (
+      <p className="pixel-font text-sm whitespace-pre-wrap leading-relaxed">{children}</p>
+    ),
+    strong: ({ node, children }) => (
+      <strong className="font-bold text-white">{children}</strong>
+    ),
+  }}
+>
+  {message.content}
+</ReactMarkdown>
+
                   ) : (
                     <p className="pixel-font text-sm leading-relaxed">{message.content}</p>
                   )}
@@ -109,7 +115,7 @@ const NFTAssistant = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <CopilotTextarea
+              <textarea
                 value={input}
                 onChange={handleInputChange}
                 className="w-full h-24 p-3 rounded-md bg-black/60 border border-purple-500/40 text-gray-300 pixel-font text-sm focus:outline-none focus:border-pink-500 shadow-inner shadow-black resize-none overflow-hidden"
@@ -122,11 +128,17 @@ const NFTAssistant = () => {
                 disabled={isLoading || !input.trim()}
                 className={`w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg pixel-font text-white text-lg transition-all transform hover:scale-105 hover:shadow-xl hover:from-purple-600 hover:to-pink-600 ${
                   isLoading || !input.trim() ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"
-                }}`}
+                }`}
               >
                 {isLoading ? "Sending..." : "Send"}
               </button>
             </form>
+          </div>
+          <div className="flex justify-end mt-4 pt-4 border-t border-purple-500/20">
+            <div className="text-xs text-gray-500 pixel-font opacity-60 flex items-center gap-1">
+              <Zap className="w-3 h-3" />
+              Powered by @io.net
+            </div>
           </div>
         </CardContent>
       </Card>
