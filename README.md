@@ -4,15 +4,15 @@ Pixel8r is a decentralized NFT platform built with **Next.js**, **Solidity**, an
 
 What sets **Pixel8r** apart? It makes **digital art copyright-proof**. By subtly altering each pixel’s composition, the platform ensures that **every artwork is one-of-a-kind and immune to copyright claims**. Your creations remain **unique, secure, and truly yours** — down to the last pixel.
 
-Additionally, Pixel8r integrates an **AI-powered NFT expert**, built using **CopilotKit**, to assist users throughout the platform. The AI agent provides **personalized guidance** on creating, listing, and managing NFTs, helping users navigate the **NFT landscape** efficiently. Whether you're a beginner or an experienced creator, the **AI expert** ensures you make the most of your digital art journey on Pixel8r.
+Additionally, Pixel8r integrates an **AI-powered NFT expert**, built using **io.net**, to assist users throughout the platform. The AI agent provides **personalized guidance** on creating, listing, and managing NFTs, helping users navigate the **NFT landscape** efficiently. Whether you're a beginner or an experienced creator, the **AI expert** ensures you make the most of your digital art journey on Pixel8r.
 
 ## Live Demo: https://pixel8r2.vercel.app
 
-![image](https://github.com/user-attachments/assets/0854d020-6474-4f9e-86e7-8408e5c5d4a7)
+![image](https://github.com/user-attachments/assets/31c5dab5-e5ae-4890-a0a9-0ad75bf0b948)
 
-![image](https://github.com/user-attachments/assets/00be1263-6bef-41db-a19e-d4a202474fd6)
+![image](https://github.com/user-attachments/assets/509d901a-b9a6-4bef-a374-54de50af0ffc)
 
-![image](https://github.com/user-attachments/assets/8c86b092-e036-4565-8e01-2493760db823)
+![image](https://github.com/user-attachments/assets/70521862-c9e3-46ae-a67d-3e44a5d96e94)
 
 ![image](https://github.com/user-attachments/assets/fb3eb5eb-9752-41b9-859a-07f8f4fc20a4)
 
