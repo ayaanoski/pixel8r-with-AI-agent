@@ -14,13 +14,14 @@ Additionally, Pixel8r integrates an **AI-powered NFT expert**, built using **io.
 
 ![image](https://github.com/user-attachments/assets/70521862-c9e3-46ae-a67d-3e44a5d96e94)
 
-![image](https://github.com/user-attachments/assets/fb3eb5eb-9752-41b9-859a-07f8f4fc20a4)
+![image](https://github.com/user-attachments/assets/6283b546-f973-4108-8bbe-e9d52b0d215e)
 
 
 
 ## Features
 - **NFT Maker**: Create unique pixel art NFTs directly from the platform.
 - **Marketplace**: Browse, buy, and sell NFTs in a decentralized marketplace.
+- **NFT-AI**: Smart AI agent powered by IO.NET
 - **My Collection**: Manage your NFT collection in one place.
 - **Pixelate Tool**: Convert images into pixel art directly on the platform.
 - **Profile Management**: Customize your profile and view transaction history.
