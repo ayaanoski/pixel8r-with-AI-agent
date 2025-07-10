@@ -8,24 +8,35 @@ Additionally, Pixel8r integrates an **AI-powered NFT expert**, built using **io.
 
 ## Live Demo: https://pixel8r2.vercel.app
 
-![image](https://github.com/user-attachments/assets/31c5dab5-e5ae-4890-a0a9-0ad75bf0b948)
+<img width="1872" height="921" alt="image" src="https://github.com/user-attachments/assets/f08820f1-9798-451b-b46c-c47bf999a10e" />
 
-![image](https://github.com/user-attachments/assets/509d901a-b9a6-4bef-a374-54de50af0ffc)
+<img width="1873" height="929" alt="image" src="https://github.com/user-attachments/assets/2d09366f-d962-40cc-a138-273d4eb9dfaa" />
 
-![image](https://github.com/user-attachments/assets/70521862-c9e3-46ae-a67d-3e44a5d96e94)
+<img width="1872" height="919" alt="image" src="https://github.com/user-attachments/assets/a2b5ec23-7ff0-4aa0-a777-f1a74589744c" />
 
-![image](https://github.com/user-attachments/assets/6283b546-f973-4108-8bbe-e9d52b0d215e)
+<img width="1876" height="923" alt="image" src="https://github.com/user-attachments/assets/c3095ed0-ac33-4dcc-8818-464c4029f1a3" />
 
-
+<img width="1871" height="925" alt="image" src="https://github.com/user-attachments/assets/af673aba-1fe2-4226-a788-fa64d14ee4f3" />
 
 ## Features
 - **NFT Maker**: Create unique pixel art NFTs directly from the platform.
 - **Marketplace**: Browse, buy, and sell NFTs in a decentralized marketplace.
+- **Deploy NFT** Suggestor: Upload your NFT artwork and let AI suggest a title, description, and estimated price based on image analysis.
 - **NFT-AI**: Smart AI agent powered by IO.NET
 - **My Collection**: Manage your NFT collection in one place.
 - **Pixelate Tool**: Convert images into pixel art directly on the platform.
 - **Profile Management**: Customize your profile and view transaction history.
 - **Blockchain Integration**: Smart contracts deployed on the Polygon blockchain.
+
+## AI Integration with IO Intelligence
+
+Pixel8r features two powerful AI models from io.net’s IO Intelligence to enhance the user experience:
+
+meta-llama/Llama-3.2-90B-Vision-Instruct: Powers the Deploy NFT Suggestor, analyzing uploaded artwork and generating an ideal title, description, and estimated price based on visual content.
+
+meta-llama/Llama-3.3-70B-Instruct: Fuels the NFT-AI Assistant, providing real-time help, guidance, and answers related to NFTs, wallet setup, deployment, and marketplace strategies.
+
+These models ensure both visual intelligence and language expertise work together to support users in creating, managing, and optimizing their NFT journey.
 
 ## Tech Stack
 - **Next.js** for frontend development
