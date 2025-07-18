@@ -1,197 +1,263 @@
-"use client"
+// components/Pixelate.jsx (or pages/pixelate.jsx if it's a page)
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import BackgroundCollage from "../components/BackgroundCollage"
-import Confetti from "react-confetti"
-import { motion } from "framer-motion"
-import { Download, ImageIcon, Settings, Sparkles, Wand2 } from 'lucide-react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Slider } from "@/components/ui/slider"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useState, useRef, useEffect } from "react";
+import BackgroundCollage from "../components/BackgroundCollage"; // Adjust path as needed
+import Confetti from "react-confetti";
+import { motion } from "framer-motion";
+import {
+  Download,
+  ImageIcon,
+  Settings,
+  Sparkles,
+  Wand2,
+  Lightbulb,
+  Info, // Added Info icon for explanation
+  XCircle, // Added XCircle for cancel upload
+} from "lucide-react";
+// Removed Tabs imports as they are no longer used
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Pixelate() {
-  const [originalImage, setOriginalImage] = useState(null)
-  const [pixelatedImage, setPixelatedImage] = useState(null)
-  const [sliderPosition, setSliderPosition] = useState(50)
-  const [imageDimensions, setImageDimensions] = useState({ width: 0, height: 0 })
-  const [showConfetti, setShowConfetti] = useState(false)
-  const [hoveredCard, setHoveredCard] = useState(null)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const canvasRef = useRef(null)
-  const sliderRef = useRef(null)
-  const [pixelSize, setPixelSize] = useState(8)
-  const [saturation, setSaturation] = useState(1.2)
-  const [contrast, setContrast] = useState(1.1)
-  const [smoothing, setSmoothing] = useState(true)
+  const [originalImage, setOriginalImage] = useState(null);
+  const [pixelatedImage, setPixelatedImage] = useState(null);
+  const [sliderPosition, setSliderPosition] = useState(50);
+  const [imageDimensions, setImageDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const canvasRef = useRef(null);
+
+  const [pixelSize, setPixelSize] = useState(8);
+  const [saturation, setSaturation] = useState(1.2);
+  const [contrast, setContrast] = useState(1.1);
+  const [smoothing, setSmoothing] = useState(true);
+
+  const { toast } = useToast();
 
   const handleImageUpload = (e) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
-          const img = new window.Image()
+          const img = new window.Image();
           img.onload = () => {
-            setImageDimensions({ width: img.width, height: img.height })
-            setOriginalImage(img.src)
-            setPixelatedImage(null) // Reset pixelated image when new image is uploaded
-          }
-          img.src = e.target.result
+            setImageDimensions({ width: img.width, height: img.height });
+            setOriginalImage(img.src);
+            setPixelatedImage(null); // Reset pixelated image on new upload
+            // Reset settings to default or last used if needed,
+            // or rely on AI suggestion to set them after upload.
+            setPixelSize(8);
+            setSaturation(1.2);
+            setContrast(1.1);
+            setSmoothing(true);
+          };
+          img.src = e.target.result;
         }
-      }
-      reader.readAsDataURL(file)
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const handleCancelUpload = () => {
-    setOriginalImage(null)
-    setPixelatedImage(null)
-    setImageDimensions({ width: 0, height: 0 })
-    const fileInput = document.getElementById("imageUpload")
+    setOriginalImage(null);
+    setPixelatedImage(null);
+    setImageDimensions({ width: 0, height: 0 });
+    const fileInput = document.getElementById("imageUpload");
     if (fileInput) {
-      fileInput.value = ""
+      fileInput.value = "";
     }
-  }
+  };
 
   const handleSliderChange = (e) => {
-    setSliderPosition(Number(e.target.value))
-  }
+    setSliderPosition(Number(e.target.value));
+  };
 
   const pixelateImageTo8Bit = () => {
-    if (!originalImage || !canvasRef.current) return
-    setIsProcessing(true)
+    if (!originalImage || !canvasRef.current) return;
+    setIsProcessing(true);
 
-    const img = new window.Image()
+    const img = new window.Image();
     img.onload = () => {
-      const canvas = canvasRef.current
-      const ctx = canvas.getContext("2d", { willReadFrequently: true })
-      if (!ctx) return
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return;
 
-      // Set canvas dimensions
-      canvas.width = img.width
-      canvas.height = img.height
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0, img.width, img.height);
 
-      // Draw original image
-      ctx.drawImage(img, 0, 0, img.width, img.height)
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
 
-      // Get image data
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      const data = imageData.data
+      const pixelBlockSize = pixelSize;
 
-      // Create temporary canvas for processing
-      const tempCanvas = document.createElement("canvas")
-      const tempCtx = tempCanvas.getContext("2d")
-      if (!tempCtx) return
-
-      tempCanvas.width = canvas.width
-      tempCanvas.height = canvas.height
-      tempCtx.drawImage(canvas, 0, 0)
-
-      // Calculate pixel block size based on image dimensions
-      const pixelBlockSize = pixelSize
-
-      // Process image in blocks
       for (let y = 0; y < canvas.height; y += pixelBlockSize) {
         for (let x = 0; x < canvas.width; x += pixelBlockSize) {
           let r = 0,
             g = 0,
             b = 0,
             a = 0,
-            count = 0
+            count = 0;
 
-          // Average colors in the block
-          for (let py = 0; py < pixelBlockSize && y + py < canvas.height; py++) {
-            for (let px = 0; px < pixelBlockSize && x + px < canvas.width; px++) {
-              const i = ((y + py) * canvas.width + (x + px)) * 4
-              r += data[i]
-              g += data[i + 1]
-              b += data[i + 2]
-              a += data[i + 3]
-              count++
+          for (
+            let py = 0;
+            py < pixelBlockSize && y + py < canvas.height;
+            py++
+          ) {
+            for (
+              let px = 0;
+              px < pixelBlockSize && x + px < canvas.width;
+              px++
+            ) {
+              const i = ((y + py) * canvas.width + (x + px)) * 4;
+              r += data[i];
+              g += data[i + 1];
+              b += data[i + 2];
+              a += data[i + 3];
+              count++;
             }
           }
 
-          // Calculate average color
-          r = Math.round(r / count)
-          g = Math.round(g / count)
-          b = Math.round(b / count)
-          a = Math.round(a / count)
+          r = Math.round(r / count);
+          g = Math.round(g / count);
+          b = Math.round(b / count);
+          a = Math.round(a / count);
 
-          // Enhance colors
-          const saturationFactor = saturation
-          const contrastFactor = contrast
+          const saturationFactor = saturation;
+          const contrastFactor = contrast;
 
-          // Apply contrast
-          r = ((r / 255 - 0.5) * contrastFactor + 0.5) * 255
-          g = ((g / 255 - 0.5) * contrastFactor + 0.5) * 255
-          b = ((b / 255 - 0.5) * contrastFactor + 0.5) * 255
+          r = ((r / 255 - 0.5) * contrastFactor + 0.5) * 255;
+          g = ((g / 255 - 0.5) * contrastFactor + 0.5) * 255;
+          b = ((b / 255 - 0.5) * contrastFactor + 0.5) * 255;
 
-          // Apply saturation
-          const gray = (r + g + b) / 3
-          r = gray + (r - gray) * saturationFactor
-          g = gray + (g - gray) * saturationFactor
-          b = gray + (b - gray) * saturationFactor
+          const gray = (r + g + b) / 3;
+          r = gray + (r - gray) * saturationFactor;
+          g = gray + (g - gray) * saturationFactor;
+          b = gray + (b - gray) * saturationFactor;
 
-          // Clamp values
-          r = Math.max(0, Math.min(255, Math.round(r)))
-          g = Math.max(0, Math.min(255, Math.round(g)))
-          b = Math.max(0, Math.min(255, Math.round(b)))
+          r = Math.max(0, Math.min(255, Math.round(r)));
+          g = Math.max(0, Math.min(255, Math.round(g)));
+          b = Math.max(0, Math.min(255, Math.round(b)));
 
-          // Fill the pixel block with the enhanced average color
-          ctx.fillStyle = `rgba(${r},${g},${b},${a / 255})`
-          ctx.fillRect(x, y, pixelBlockSize, pixelBlockSize)
+          ctx.fillStyle = `rgba(${r},${g},${b},${a / 255})`;
+          ctx.fillRect(x, y, pixelBlockSize, pixelBlockSize);
         }
       }
 
-      // Apply slight smoothing for better quality
-      if (smoothing) {
-        ctx.imageSmoothingEnabled = true
-        ctx.imageSmoothingQuality = "high"
-      } else {
-        ctx.imageSmoothingEnabled = false
-      }
+      ctx.imageSmoothingEnabled = smoothing;
+      ctx.imageSmoothingQuality = "high";
 
-      setPixelatedImage(canvas.toDataURL())
-      setShowConfetti(true)
-      setIsProcessing(false)
-      setTimeout(() => setShowConfetti(false), 5000)
-    }
+      setPixelatedImage(canvas.toDataURL());
+      setShowConfetti(true);
+      setIsProcessing(false);
+      setTimeout(() => setShowConfetti(false), 5000);
+    };
 
-    img.src = originalImage
-  }
+    img.src = originalImage;
+  };
 
   const getResponsiveDimensions = () => {
-    if (typeof window === "undefined") return { width: 0, height: 0 }
+    if (typeof window === "undefined") return { width: 0, height: 0 };
 
-    const screenWidth = window.innerWidth
-    const padding = screenWidth < 640 ? 32 : 64
-    const maxWidth = Math.min(imageDimensions.width, screenWidth - padding)
-    const aspectRatio = imageDimensions.height / imageDimensions.width
-    const height = maxWidth * aspectRatio
+    const screenWidth = window.innerWidth;
+    const padding = screenWidth < 640 ? 32 : 64;
+    const maxWidth = Math.min(imageDimensions.width, screenWidth - padding);
+    const aspectRatio = imageDimensions.height / imageDimensions.width;
+    let height = maxWidth * aspectRatio;
 
-    const maxHeight = window.innerHeight * 0.6
+    const maxHeight = window.innerHeight * 0.6;
     if (height > maxHeight) {
+      height = maxHeight;
       return {
         width: maxHeight / aspectRatio,
         height: maxHeight,
-      }
+      };
     }
-
-    return { width: maxWidth, height }
-  }
+    return { width: maxWidth, height };
+  };
 
   const downloadPixelatedImage = () => {
     if (pixelatedImage) {
-      const link = document.createElement("a")
-      link.href = pixelatedImage
-      link.download = "pixelated_image.png"
-      link.click()
+      const link = document.createElement("a");
+      link.href = pixelatedImage;
+      link.download = "pixelated_image.png";
+      link.click();
     }
-  }
+  };
+
+  const getAISuggestions = async () => {
+    if (!originalImage) {
+      toast({
+        title: "No Image Uploaded",
+        description: "Please upload an image before getting AI suggestions.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSuggesting(true);
+    toast({
+      title: "Getting AI Suggestions...",
+      description: "Analyzing your image to find the best pixelation settings.",
+    });
+
+    try {
+      const response = await fetch("/api/ai-pixelate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ imageData: originalImage }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to get AI suggestions");
+      }
+
+      const suggestions = await response.json();
+      console.log("AI Suggestions:", suggestions);
+
+      setPixelSize(Math.round(suggestions.pixelSize || pixelSize));
+      setSaturation(suggestions.saturation || saturation);
+      setContrast(suggestions.contrast || contrast);
+      setSmoothing(
+        suggestions.smoothing !== undefined ? suggestions.smoothing : smoothing
+      );
+
+      toast({
+        title: "AI Suggestions Applied! ✨",
+        description:
+          "Review the settings and click 'Pixelate Image' to see the result.",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error("Error fetching AI suggestions:", error);
+      toast({
+        title: "Failed to Get AI Suggestions",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSuggesting(false);
+    }
+  };
 
   const features = [
     {
@@ -218,9 +284,9 @@ export default function Pixelate() {
       color: "from-pink-500 to-rose-500",
       description: "8-bit style transformations",
     },
-  ]
+  ];
 
-  const responsiveDimensions = getResponsiveDimensions()
+  const responsiveDimensions = getResponsiveDimensions();
 
   return (
     <div className="min-h-screen bg-gray-900 overflow-hidden">
@@ -276,7 +342,11 @@ export default function Pixelate() {
               Transform your NFT masterpieces into 8-bit art
               <motion.span
                 animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "linear",
+                }}
                 className="ml-2"
               >
                 <Sparkles className="w-6 h-6 text-yellow-400" />
@@ -284,6 +354,7 @@ export default function Pixelate() {
             </p>
           </motion.div>
 
+          {/* Features Section - Keep as is, it's good */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12 w-full max-w-2xl px-4">
             {features.map((feature, index) => (
               <motion.div
@@ -293,23 +364,27 @@ export default function Pixelate() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
                 whileHover={{ scale: 1.02, rotateY: 10 }}
-                onHoverStart={() => setHoveredCard(index)}
-                onHoverEnd={() => setHoveredCard(null)}
               >
                 <div
                   className={`
                   h-full p-6 rounded-xl
                   bg-gradient-to-br ${feature.color}
                   transform transition-all duration-300
-                  group-hover:shadow-2xl group-hover:shadow-${feature.color.split("-")[1]}/50
+                  group-hover:shadow-2xl group-hover:shadow-${
+                    feature.color.split("-")[1]
+                  }/50
                   relative z-10 backdrop-blur-sm bg-opacity-20
                   border border-white/20
                 `}
                 >
                   <div className="flex flex-col items-center space-y-3">
                     <span className="text-3xl">{feature.icon}</span>
-                    <h3 className="pixel-font text-white text-center">{feature.text}</h3>
-                    <p className="text-sm text-white/80 text-center">{feature.description}</p>
+                    <h3 className="pixel-font text-white text-center">
+                      {feature.text}
+                    </h3>
+                    <p className="text-sm text-white/80 text-center">
+                      {feature.description}
+                    </p>
                   </div>
                 </div>
 
@@ -328,165 +403,222 @@ export default function Pixelate() {
           </div>
 
           <TooltipProvider>
-            <Card className="w-full max-w-2xl mb-8 bg-gray-800/50 backdrop-blur-sm border-white/10">
-              <CardContent className="p-6">
-                <Tabs defaultValue="upload" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 bg-gray-700/50">
-                    <TabsTrigger value="upload" className="pixel-font text-sm">
-                      <ImageIcon className="w-4 h-4 mr-2" />
-                      Upload
-                    </TabsTrigger>
-                    <TabsTrigger value="settings" className="pixel-font text-sm">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Settings
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="upload" className="mt-4">
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <div className="flex-1">
-                        <Label
-                          htmlFor="imageUpload"
-                          className="block mb-3 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500"
-                        >
-                          Upload Your Image:
-                        </Label>
-                        <input
-                          id="imageUpload"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="w-full px-4 py-2 bg-gray-700/50 rounded-lg pixel-font text-white text-sm
-                            border border-white/10 focus:border-green-400/50 transition-all duration-300
-                            file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
-                            file:text-sm file:font-semibold file:pixel-font
-                            file:bg-green-400 file:text-gray-900
-                            hover:file:bg-green-500"
-                        />
-                      </div>
-                      {originalImage && (
-                        <Button
-                          onClick={handleCancelUpload}
-                          variant="destructive"
-                          className="pixel-font text-sm"
-                        >
-                          Cancel
-                        </Button>
-                      )}
+            <Card className="w-full max-w-2xl mb-8 bg-gray-800/50 backdrop-blur-sm border-white/10 p-6">
+              {/* Conditional Rendering based on whether an image is uploaded */}
+              {!originalImage ? (
+                // --- Initial Upload State ---
+                <motion.div
+                  key="upload-section"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-6"
+                >
+                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-600 rounded-lg text-gray-400">
+                    <ImageIcon className="w-12 h-12 mb-4 text-gray-500" />
+                    <Label
+                      htmlFor="imageUpload"
+                      className="block mb-3 pixel-font text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 text-lg cursor-pointer"
+                    >
+                      Click to Upload Your Image
+                    </Label>
+                    <p className="text-sm text-gray-500 mb-4">
+                      (PNG, JPG, GIF up to 10MB)
+                    </p>
+                    <input
+                      id="imageUpload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden" // Hide the default file input
+                    />
+                    <Button
+                      onClick={() => document.getElementById("imageUpload").click()}
+                      className="pixel-font bg-green-500 hover:bg-green-600 text-gray-900 transition-all duration-300 hover:scale-[1.01]"
+                    >
+                      <ImageIcon className="w-4 h-4 mr-2" /> Choose File
+                    </Button>
+                  </div>
+                </motion.div>
+              ) : (
+                // --- After Image Uploaded: Show AI, Settings, and Pixelate Button ---
+                <motion.div
+                  key="controls-section"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-8"
+                >
+                  {/* Uploaded Image Preview & Cancel */}
+                  <div className="relative w-full max-w-md mx-auto mb-6 flex flex-col items-center">
+                    <img
+                      src={originalImage}
+                      alt="Uploaded"
+                      className="max-w-full h-auto rounded-lg shadow-xl border border-gray-700/50"
+                      style={{ maxHeight: '200px', objectFit: 'contain' }}
+                    />
+                    <Button
+                      onClick={handleCancelUpload}
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2 pixel-font rounded-full px-2 py-1 flex items-center text-xs"
+                    >
+                      <XCircle className="w-3 h-3 mr-1" />
+                      Clear Image
+                    </Button>
+                    <p className="text-sm text-gray-400 pixel-font mt-2">
+                      Original size: {imageDimensions.width} x {imageDimensions.height}
+                    </p>
+                  </div>
+
+                  {/* AI Suggestions Section */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="p-4 bg-gradient-to-br from-indigo-800/30 to-purple-800/30 rounded-lg border border-indigo-700/50 shadow-lg space-y-3"
+                  >
+                    <div className="flex items-center gap-2 text-indigo-300 pixel-font text-sm">
+                      <Lightbulb className="w-5 h-5" />
+                      AI Pixelation Assistant
                     </div>
-                  </TabsContent>
+                    <p className="text-sm text-gray-300 mb-3">
+                      Let our AI analyze your image and suggest optimal
+                      settings for the best 8-bit aesthetic.
+                    </p>
+                    <Button
+                      onClick={getAISuggestions}
+                      disabled={isSuggesting}
+                      className="w-full pixel-font bg-gradient-to-r from-teal-400 to-cyan-600 hover:from-cyan-600 hover:to-teal-400 transform transition-all duration-300 hover:scale-[1.01]"
+                    >
+                      <Wand2 className="w-4 h-4 mr-2" />
+                      {isSuggesting ? "Analyzing..." : "Get Smart Suggestions"}
+                    </Button>
+                  </motion.div>
 
-                  <TabsContent value="settings" className="mt-4 space-y-4">
-                    <div className="space-y-6">
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <Label className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
-                            Pixel Size: {pixelSize}px
-                          </Label>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <div className="text-xs text-muted-foreground">ℹ️</div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Larger values create bigger pixels</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                        <Slider
-                          value={[pixelSize]}
-                          onValueChange={(value) => setPixelSize(value[0])}
-                          min={2}
-                          max={32}
-                          step={1}
-                          className="pixel-slider"
-                        />
-                      </div>
+                  {/* Manual Adjustments Section */}
+                  <div className="space-y-6 mt-6 pt-4 border-t border-gray-700/50">
+                    <div className="flex items-center gap-2 text-green-300 pixel-font text-sm mb-4">
+                      <Settings className="w-5 h-5" />
+                      Manual Adjustments
+                    </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <Label className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
-                            Color Saturation: {(saturation * 100).toFixed(0)}%
-                          </Label>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <div className="text-xs text-muted-foreground">ℹ️</div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Enhance color vibrancy</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                        <Slider
-                          value={[saturation * 100]}
-                          onValueChange={(value) => setSaturation(value[0] / 100)}
-                          min={50}
-                          max={200}
-                          step={5}
-                          className="pixel-slider"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <Label className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
-                            Contrast: {(contrast * 100).toFixed(0)}%
-                          </Label>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <div className="text-xs text-muted-foreground">ℹ️</div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Adjust image contrast</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                        <Slider
-                          value={[contrast * 100]}
-                          onValueChange={(value) => setContrast(value[0] / 100)}
-                          min={50}
-                          max={150}
-                          step={5}
-                          className="pixel-slider"
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id="smoothing"
-                            checked={smoothing}
-                            onCheckedChange={setSmoothing}
-                          />
-                          <Label
-                            htmlFor="smoothing"
-                            className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500"
-                          >
-                            Edge Smoothing
-                          </Label>
-                        </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <Label className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+                          Pixel Size: {pixelSize}px
+                        </Label>
                         <Tooltip>
                           <TooltipTrigger>
-                            <div className="text-xs text-muted-foreground">ℹ️</div>
+                            <Info className="w-4 h-4 text-gray-400" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Smooth pixel edges</p>
+                            <p>Larger values create bigger pixels</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
+                      <Slider
+                        value={[pixelSize]}
+                        onValueChange={(value) => setPixelSize(value[0])}
+                        min={2}
+                        max={32}
+                        step={1}
+                        className="pixel-slider"
+                      />
                     </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <Label className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+                          Color Saturation: {(saturation * 100).toFixed(0)}%
+                        </Label>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="w-4 h-4 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Enhance color vibrancy</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <Slider
+                        value={[saturation * 100]}
+                        onValueChange={(value) =>
+                          setSaturation(value[0] / 100)
+                        }
+                        min={50}
+                        max={200}
+                        step={5}
+                        className="pixel-slider"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <Label className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+                          Contrast: {(contrast * 100).toFixed(0)}%
+                        </Label>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="w-4 h-4 text-gray-400" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Adjust image contrast</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <Slider
+                        value={[contrast * 100]}
+                        onValueChange={(value) =>
+                          setContrast(value[0] / 100)
+                        }
+                        min={50}
+                        max={150}
+                        step={5}
+                        className="pixel-slider"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id="smoothing"
+                          checked={smoothing}
+                          onCheckedChange={setSmoothing}
+                        />
+                        <Label
+                          htmlFor="smoothing"
+                          className="pixel-font text-sm text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500"
+                        >
+                          Edge Smoothing
+                        </Label>
+                      </div>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Info className="w-4 h-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Smooth pixel edges</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </Card>
           </TooltipProvider>
 
-          {originalImage && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          {originalImage && ( // Show Pixelate button only if image is uploaded
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
               <Button
                 onClick={pixelateImageTo8Bit}
                 disabled={isProcessing}
                 size="lg"
-                className="pixel-font bg-gradient-to-r from-green-400 to-blue-500 hover:from-blue-500 hover:to-green-400"
+                className="pixel-font bg-gradient-to-r from-green-400 to-blue-500 hover:from-blue-500 hover:to-green-400 transition-all duration-300 hover:scale-105"
               >
                 <Wand2 className="w-5 h-5 mr-2" />
                 {isProcessing ? "Processing..." : "Pixelate Image"}
@@ -541,14 +673,15 @@ export default function Pixelate() {
               </div>
 
               <div className="text-center text-sm text-gray-400 pixel-font">
-                Original size: {imageDimensions.width} x {imageDimensions.height}
+                Original size: {imageDimensions.width} x{" "}
+                {imageDimensions.height}
               </div>
 
               <Button
                 onClick={downloadPixelatedImage}
                 variant="outline"
                 size="lg"
-                className="pixel-font bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 border-0"
+                className="pixel-font bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 border-0 transition-all duration-300 hover:scale-105"
               >
                 <Download className="w-5 h-5 mr-2" />
                 Download Pixelated Image
@@ -564,17 +697,24 @@ export default function Pixelate() {
           border-right: 2px solid #4ade80;
           white-space: nowrap;
           margin: 0 auto;
-          animation: 
-            typing 3.5s steps(40, end),
-            blink-caret .75s step-end infinite;
+          animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
         }
         @keyframes typing {
-          from { width: 0 }
-          to { width: 100% }
+          from {
+            width: 0;
+          }
+          to {
+            width: 100%;
+          }
         }
         @keyframes blink-caret {
-          from, to { border-color: transparent }
-          50% { border-color: #4ade80 }
+          from,
+          to {
+            border-color: transparent;
+          }
+          50% {
+            border-color: #4ade80;
+          }
         }
         .comparison-slider {
           box-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
@@ -592,23 +732,26 @@ export default function Pixelate() {
           }
         }
         .pixel-font {
-          font-family: 'Press Start 2P', monospace;
+          font-family: "Press Start 2P", monospace;
           letter-spacing: 0.05em;
         }
         .neon-border {
           box-shadow: 0 0 10px rgba(74, 222, 128, 0.3),
-                      0 0 20px rgba(74, 222, 128, 0.2),
-                      0 0 30px rgba(74, 222, 128, 0.1);
+            0 0 20px rgba(74, 222, 128, 0.2),
+            0 0 30px rgba(74, 222, 128, 0.1);
         }
         .pixel-slider [role="slider"] {
-          @apply w-4 h-4 border-2 border-primary;
+          width: 16px; /* Equivalent to w-4 */
+          height: 16px; /* Equivalent to h-4 */
+          border: 2px solid var(--primary); /* Assuming --primary is defined in your global CSS or theme */
         }
         .pixel-slider [role="slider"]:focus {
-          @apply ring-2 ring-primary ring-offset-2;
+          outline: 2px solid var(--primary); /* Equivalent to ring-2 ring-primary */
+          outline-offset: 2px; /* Equivalent to ring-offset-2 */
         }
       `}</style>
 
       <canvas ref={canvasRef} style={{ display: "none" }} />
     </div>
-  )
+  );
 }
